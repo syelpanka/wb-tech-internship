@@ -6,11 +6,11 @@ urlpatterns = [
     path(
         '',
         csrf_exempt(ProductListCreateView.as_view()),
-        name='products-list',
+        name='product-list',
     ),
     path(
         '<int:pk>/',
         csrf_exempt(ProductDetailView.as_view()),
-        name='products-detail',
+        name='product-detail',
     ),
 ]
