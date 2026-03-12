@@ -20,16 +20,13 @@ class UserRegistrationTests(APITestCase):
         self.assertEqual(response.data['username'], 'testuser')
         self.assertNotIn('password', response.data)
 
-        # Проверяем, что пользователь создан в БД
         self.assertTrue(User.objects.filter(username='testuser').exists())
         user = User.objects.get(username='testuser')
-        # Проверяем, что профиль создан сигналом
         self.assertTrue(hasattr(user, 'profile'))
         self.assertEqual(float(user.profile.balance), 0.00)
 
     def test_registration_duplicate_username(self):
         """Попытка регистрации с уже существующим username"""
-        # Сначала создаём пользователя
         User.objects.create_user(username='testuser', password='pass123')
         url = reverse('register')
         data = {
@@ -44,7 +41,7 @@ class UserRegistrationTests(APITestCase):
     def test_registration_missing_fields(self):
         """Регистрация без обязательных полей"""
         url = reverse('register')
-        data = {'username': 'incomplete'}  # нет password и email
+        data = {'username': 'incomplete'}  
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('password', response.data)
@@ -140,7 +137,6 @@ class DepositTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(float(response.data['balance']), 100.50)
-        # Проверяем обновление в БД
         self.user.profile.refresh_from_db()
         self.assertEqual(float(self.user.profile.balance), 100.50)
 
@@ -174,7 +170,7 @@ class DepositTests(APITestCase):
 
     def test_deposit_unauthenticated(self):
         """Пополнение без токена"""
-        self.client.credentials()  # убираем токен
+        self.client.credentials()
         url = reverse('deposit')
         data = {'amount': 100}
         response = self.client.post(url, data, format='json')
