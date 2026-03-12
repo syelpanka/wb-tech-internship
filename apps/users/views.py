@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 
 # Create your views here.
@@ -17,6 +17,7 @@ class RegisterView(generics.CreateAPIView):
 
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+
 
 class ProfileView(APIView):
     """
@@ -35,7 +36,8 @@ class ProfileView(APIView):
         profile = request.user.profile
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
-    
+
+
 class DepositView(APIView):
     """
     Пополнение баланса текущего пользователя.
@@ -52,17 +54,17 @@ class DepositView(APIView):
                 {'error': 'Amount is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             amount = Decimal(str(amount))
             if amount <= 0:
                 raise ValueError
-        except ValueError:
+        except (ValueError, InvalidOperation, TypeError):
             return Response(
                 {'error': 'Amount must be a positive number'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         profile = request.user.profile
 
         profile.balance += amount
