@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +9,8 @@ from .serializers import (
     AddToCartSerializer,
     UpdateCartItemSerializer,
 )
+
+
 # Create your views here.
 class CartListView(APIView):
     """Просмотр корзины: GET /api/cart/"""
@@ -76,7 +77,11 @@ class UpdateCartItemView(APIView):
 
     def patch(self, request, product_id):
         product = get_object_or_404(Product, pk=product_id)
-        cart_item = get_object_or_404(CartItem, user=request.user, product=product)
+        cart_item = get_object_or_404(
+            CartItem,
+            user=request.user,
+            product=product
+        )
 
         serializer = UpdateCartItemSerializer(data=request.data)
         if serializer.is_valid():
@@ -104,6 +109,10 @@ class RemoveFromCartView(APIView):
 
     def delete(self, request, product_id):
         product = get_object_or_404(Product, pk=product_id)
-        cart_item = get_object_or_404(CartItem, user=request.user, product=product)
+        cart_item = get_object_or_404(
+            CartItem,
+            user=request.user,
+            product=product
+        )
         cart_item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

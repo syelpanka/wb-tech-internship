@@ -26,7 +26,7 @@ class AddToCartSerializer(serializers.Serializer):
         except Product.DoesNotExist:
             raise serializers.ValidationError("Product not found")
         return value
-    
+
     def validate(self, data):
         product = Product.objects.get(pk=data['product_id'])
         if data['quantity'] > product.stock:

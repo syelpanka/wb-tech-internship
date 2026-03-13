@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from apps.products.models import Product
 from apps.cart.models import CartItem
 
+
 class CartTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -39,7 +40,11 @@ class CartTests(APITestCase):
         self.assertEqual(item.quantity, 2)
 
     def test_add_existing_product_updates_quantity(self):
-        CartItem.objects.create(user=self.user, product=self.product, quantity=1)
+        CartItem.objects.create(
+            user=self.user,
+            product=self.product,
+            quantity=1
+        )
         data = {'product_id': self.product.id, 'quantity': 2}
         response = self.client.post(self.add_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,29 +63,57 @@ class CartTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_cart_list(self):
-        CartItem.objects.create(user=self.user, product=self.product, quantity=2)
-        CartItem.objects.create(user=self.user, product=self.product2, quantity=1)
+        CartItem.objects.create(
+            user=self.user,
+            product=self.product,
+            quantity=2
+        )
+        CartItem.objects.create(
+            user=self.user,
+            product=self.product2,
+            quantity=1
+        )
         response = self.client.get(self.cart_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['items']), 2)
         self.assertEqual(response.data['total'], 2*100 + 1*200)
 
     def test_update_quantity_success(self):
-        item = CartItem.objects.create(user=self.user, product=self.product, quantity=2)
+        item = CartItem.objects.create(
+            user=self.user,
+            product=self.product,
+            quantity=2
+        )
         data = {'quantity': 3}
-        response = self.client.patch(self.update_url(self.product.id), data, format='json')
+        response = self.client.patch(
+            self.update_url(self.product.id),
+            data,
+            format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         item.refresh_from_db()
         self.assertEqual(item.quantity, 3)
 
     def test_update_quantity_exceeds_stock(self):
-        CartItem.objects.create(user=self.user, product=self.product, quantity=2)
+        CartItem.objects.create(
+            user=self.user,
+            product=self.product,
+            quantity=2
+        )
         data = {'quantity': 10}
-        response = self.client.patch(self.update_url(self.product.id), data, format='json')
+        response = self.client.patch(
+            self.update_url(self.product.id),
+            data,
+            format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_remove_from_cart(self):
-        CartItem.objects.create(user=self.user, product=self.product, quantity=1)
+        CartItem.objects.create(
+            user=self.user,
+            product=self.product,
+            quantity=1
+        )
         response = self.client.delete(self.remove_url(self.product.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(CartItem.objects.count(), 0)

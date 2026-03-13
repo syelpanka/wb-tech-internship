@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
-from apps.users.models import Profile
+
 
 class UserRegistrationTests(APITestCase):
     """Тесты регистрации пользователя"""
@@ -41,7 +41,7 @@ class UserRegistrationTests(APITestCase):
     def test_registration_missing_fields(self):
         """Регистрация без обязательных полей"""
         url = reverse('register')
-        data = {'username': 'incomplete'}  
+        data = {'username': 'incomplete'}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('password', response.data)
@@ -97,7 +97,9 @@ class ProfileTests(APITestCase):
     def test_profile_authenticated(self):
         """Доступ к профилю с валидным токеном"""
         url = reverse('profile')
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['user']['username'], 'testuser')
@@ -128,7 +130,9 @@ class DepositTests(APITestCase):
         from rest_framework_simplejwt.tokens import RefreshToken
         self.refresh = RefreshToken.for_user(self.user)
         self.access_token = str(self.refresh.access_token)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
 
     def test_deposit_success(self):
         """Успешное пополнение баланса"""

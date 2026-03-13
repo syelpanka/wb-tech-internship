@@ -3,7 +3,6 @@ from django.conf import settings
 from apps.products.models import Product
 
 
-
 # Create your models here.
 class CartItem(models.Model):
     user = models.ForeignKey(
